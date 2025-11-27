@@ -39,32 +39,29 @@ public class TicketController {
     }
 
     /**
-     * === MÉTODO ATUALIZADO (sem marca, cor, ano) ===
+     * Processa a entrada de um veículo.
+     * Busca ou cria o cliente/veículo e gera um novo ticket vinculado à vaga.
      */
     @PostMapping("/ticket/salvar")
     public String salvarNovoTicket(
-            // --- Campos OBRIGATÓRIOS ---
             @RequestParam("placa") String placa,
             @RequestParam("modelo") String modelo,
             @RequestParam("nomeCliente") String nomeCliente,
             @RequestParam("telefoneCliente") String telefoneCliente,
-            @RequestParam("vagaId") Long vagaId
+            @RequestParam("vagaId") Long vagaId) {
 
-            // --- Campos OPCIONAIS REMOVIDOS ---
-    ) {
-
-        // 1. Chama o "Cérebro" com a nova assinatura
         Veiculo veiculo = clienteService.findOrCreateClienteComVeiculo(
                 placa, modelo, nomeCliente, telefoneCliente
         );
 
-        // 2. Chama o "Executor" para criar o Ticket
         ticketService.registrarEntrada(veiculo, vagaId);
 
-        // 3. Redireciona de volta para o Dashboard
         return "redirect:/";
     }
 
+    /**
+     * Finaliza o ticket, libera a vaga e aplica descontos (se houver).
+     */
     @PostMapping("/ticket/confirmar-saida")
     public String confirmarSaidaDoTicket(
             @RequestParam("ticketId") Long ticketId,
@@ -82,18 +79,20 @@ public class TicketController {
 
     @GetMapping("/ticket/saida/{id}")
     public String getFormRegistrarSaida(@PathVariable("id") Long ticketId, Model model) {
-        Ticket ticket = ticketService.calcularValorAtual(ticketId);
-        Duration duracao = Duration.between(ticket.getHorarioEntrada(), LocalDateTime.now());
-        long horas = duracao.toHours();
-        long minutos = duracao.toMinutes() % 60;
-        String tempoTotal = String.format("%d horas e %d minutos", horas, minutos);
-        model.addAttribute("ticket", ticket);
-        model.addAttribute("tempoTotal", tempoTotal);
+        carregarDadosTicket(ticketId, model);
         return "registrar-saida";
     }
 
     @GetMapping("/ticket/detalhes/{id}")
     public String getDetalhesTicket(@PathVariable("id") Long ticketId, Model model) {
+        carregarDadosTicket(ticketId, model);
+        return "ticket-detalhes";
+    }
+
+    /**
+     * Método auxiliar para carregar dados do ticket e calcular tempo decorrido para exibição.
+     */
+    private void carregarDadosTicket(Long ticketId, Model model) {
         Ticket ticket = ticketService.calcularValorAtual(ticketId);
         Duration duracao = Duration.between(ticket.getHorarioEntrada(), LocalDateTime.now());
         long horas = duracao.toHours();
@@ -101,6 +100,5 @@ public class TicketController {
         String tempoTotal = String.format("%d horas e %d minutos", horas, minutos);
         model.addAttribute("ticket", ticket);
         model.addAttribute("tempoTotal", tempoTotal);
-        return "ticket-detalhes";
     }
 }

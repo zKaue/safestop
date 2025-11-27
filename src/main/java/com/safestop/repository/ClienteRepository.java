@@ -9,7 +9,9 @@ import java.util.Optional;
 @Repository
 public interface ClienteRepository extends JpaRepository<Cliente, Long> {
 
-    // Exemplo: Encontrar um cliente pelo telefone
+    /**
+     * Busca cliente pelo telefone para reaproveitamento de cadastro.
+     */
     Optional<Cliente> findByTelefone(String telefone);
 
 }

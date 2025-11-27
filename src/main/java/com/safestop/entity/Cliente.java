@@ -1,6 +1,5 @@
 package com.safestop.entity;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,6 +9,10 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Representa o cliente proprietário dos veículos.
+ * Mapeado em relacionamento OneToMany com Veiculo.
+ */
 @Entity
 @Getter
 @Setter

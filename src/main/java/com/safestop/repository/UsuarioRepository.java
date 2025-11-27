@@ -9,8 +9,9 @@ import java.util.Optional;
 @Repository
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
-    // O Spring Security VAI precisar disso.
-    // O 'Optional' é uma boa prática, pois o usuário pode não existir.
+    /**
+     * Busca usuário para autenticação via Login.
+     */
     Optional<Usuario> findByEmail(String email);
 
 }

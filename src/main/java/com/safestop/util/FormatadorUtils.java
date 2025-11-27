@@ -1,13 +1,9 @@
 package com.safestop.util;
 
-/**
- * Nossa "caixa de ferramentas" para formatar coisas.
- */
 public class FormatadorUtils {
 
     /**
-     * Transforma um telefone (11 ou 10 dígitos) em um formato legível.
-     * (ex: "41999999999" -> "(41) 99999-9999")
+     * Aplica máscara de telefone (XX) XXXXX-XXXX ou (XX) XXXX-XXXX.
      */
     public static String formatarTelefone(String telefone) {
         if (telefone == null || telefone.isEmpty()) {

@@ -4,17 +4,21 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Singleton de banco de dados para parâmetros globais do sistema.
+ * Armazena regras de negócio como tolerância e valor da hora.
+ */
 @Entity
 @Getter
 @Setter
 public class Configuracao {
 
     @Id
-    private Long id = 1L; // Sempre será ID 1
+    private Long id = 1L;
 
     @Column(nullable = false)
-    private int minutosTolerancia; // Ex: 15
+    private int minutosTolerancia;
 
     @Column(nullable = false)
-    private double valorPorHora; // Ex: 7.50
+    private double valorPorHora;
 }

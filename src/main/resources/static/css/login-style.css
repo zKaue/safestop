@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css?family=Montserrat:400,800');
 
-/* Reutiliza as variáveis do seu style.css */
+/* Variáveis herdadas para consistência visual */
 :root {
     --cor-bg: #1F2937;
     --cor-card: #374151;
@@ -18,7 +18,6 @@
 }
 
 body {
-    /* Fundo da "FODA 2.0" */
     background: var(--cor-bg);
     display: flex;
     justify-content: center;
@@ -32,7 +31,7 @@ body {
 h1 {
     font-weight: bold;
     margin: 0;
-    color: var(--cor-texto); /* Cor "FODA 2.0" */
+    color: var(--cor-texto);
 }
 
 p {
@@ -54,7 +53,8 @@ a {
     text-decoration: none;
     margin: 15px 0;
 }
-/* Mensagens de Erro/Sucesso */
+
+/* Mensagens */
 .error-message {
     color: var(--cor-perigo);
     font-weight: bold;
@@ -68,9 +68,9 @@ a {
     margin: 10px 0;
 }
 
+/* Botões */
 button {
     border-radius: 20px;
-    /* Cor "FODA 2.0" */
     border: 1px solid var(--cor-destaque);
     background-color: var(--cor-destaque);
     color: #FFFFFF;
@@ -99,8 +99,9 @@ button.ghost {
     border-color: #FFFFFF;
 }
 
+/* Formulário e Inputs */
 form {
-    background-color: var(--cor-card); /* Cor "FODA 2.0" */
+    background-color: var(--cor-card);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -111,23 +112,23 @@ form {
 }
 
 input {
-    background-color: var(--cor-bg); /* Cor "FODA 2.0" */
+    background-color: var(--cor-bg);
     border: 1px solid var(--cor-borda);
     color: var(--cor-texto);
     padding: 12px 15px;
     margin: 8px 0;
     width: 100%;
-    border-radius: 8px; /* Mais moderno */
+    border-radius: 8px;
 }
 input::placeholder {
     color: var(--cor-texto-muted);
 }
 
+/* Estrutura do Container Principal e Animação */
 .container {
-    background-color: var(--cor-card); /* Cor "FODA 2.0" */
+    background-color: var(--cor-card);
     border-radius: 10px;
-    box-shadow: 0 14px 28px rgba(0,0,0,0.25),
-    0 10px 10px rgba(0,0,0,0.22);
+    box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
     position: relative;
     overflow: hidden;
     width: 768px;
@@ -167,15 +168,8 @@ input::placeholder {
 }
 
 @keyframes show {
-    0%, 49.99% {
-        opacity: 0;
-        z-index: 1;
-    }
-
-    50%, 100% {
-        opacity: 1;
-        z-index: 5;
-    }
+    0%, 49.99% { opacity: 0; z-index: 1; }
+    50%, 100% { opacity: 1; z-index: 5; }
 }
 
 .overlay-container {
@@ -194,9 +188,7 @@ input::placeholder {
 }
 
 .overlay {
-    /* Cor "FODA 2.0" (Verde) */
     background: var(--cor-destaque);
-    background: -webkit-linear-gradient(to right, var(--cor-destaque-hover), var(--cor-destaque));
     background: linear-gradient(to right, var(--cor-destaque-hover), var(--cor-destaque));
     background-repeat: no-repeat;
     background-size: cover;
@@ -244,10 +236,4 @@ input::placeholder {
 
 .container.right-panel-active .overlay-right {
     transform: translateX(20%);
-}
-
-/* (Ícones sociais removidos para limpeza, como no seu form original) */
-.social-container {
-    margin: 20px 0;
-    display: none; /* Removido */
 }

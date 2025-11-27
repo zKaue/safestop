@@ -5,10 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-/**
- * Um DTO (pacote) que agrupa a Vaga
- * com a informação se ela está em uso ou não.
- */
 @Getter
 @Setter
 @AllArgsConstructor

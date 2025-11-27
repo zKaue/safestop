@@ -7,11 +7,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Representa o espaço físico do estacionamento.
+ * Possui identificador único (número/letra), tipo (Moto/Carro) e flag de ativo/inativo.
+ */
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor 
+@AllArgsConstructor
 public class Vaga {
 
     @Id

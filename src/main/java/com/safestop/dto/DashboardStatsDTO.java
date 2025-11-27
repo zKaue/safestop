@@ -10,22 +10,11 @@ import java.util.List;
 @Setter
 public class DashboardStatsDTO {
 
-    // "de X vagas"
     private long totalVagas;
-
-    // "vagas livres"
     private long vagasLivres;
-
-    // "vaga ocupadas"
     private long vagasOcupadas;
-
-    // "ocupaçao (em porcentagem)"
     private double percentualOcupacao;
-
-    // "lista com os carros que estao estacionado"
     private List<Ticket> ticketsAbertos;
-
-    // === CAMPO ATUALIZADO ===
     private Double faturamentoDiario;
 
 }

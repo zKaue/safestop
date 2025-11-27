@@ -16,7 +16,6 @@ public class VeiculoClienteDTO {
         this.placa = veiculo.getPlaca();
         this.modelo = veiculo.getModelo();
 
-
         Cliente cliente = veiculo.getCliente();
         if (cliente != null) {
             this.nomeCliente = cliente.getNome();

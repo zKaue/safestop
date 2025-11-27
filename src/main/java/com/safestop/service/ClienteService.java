@@ -4,12 +4,10 @@ import com.safestop.entity.Cliente;
 import com.safestop.entity.Veiculo;
 import com.safestop.repository.ClienteRepository;
 import com.safestop.repository.VeiculoRepository;
-import com.safestop.util.FormatadorUtils; // <-- 1. IMPORTE A NOVA CLASSE
+import com.safestop.util.FormatadorUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
 public class ClienteService {
@@ -21,27 +19,23 @@ public class ClienteService {
     private VeiculoRepository veiculoRepository;
 
     /**
-     * === MÉTODO ATUALIZADO (sem marca, cor, ano) ===
+     * Busca inteligente: Tenta encontrar o cliente pelo telefone (formatado).
+     * Se não existir, cria o cliente. Depois, vincula o veículo.
      */
     @Transactional
     public Veiculo findOrCreateClienteComVeiculo(
             String placa, String modelo, String nomeCliente, String telefoneCliente) {
 
-        // 2. === A MUDANÇA ESTÁ AQUI ===
-        //    Agora ele chama a nossa "ferramenta"
         String telefoneFormatado = FormatadorUtils.formatarTelefone(telefoneCliente);
 
-        // 3. Lógica do Cliente (agora busca pelo telefone FORMATADO)
         Cliente cliente = clienteRepository.findByTelefone(telefoneFormatado)
                 .orElseGet(() -> {
-                    // Cliente não existe, cria um novo
                     Cliente novoCliente = new Cliente();
                     novoCliente.setNome(nomeCliente);
-                    novoCliente.setTelefone(telefoneFormatado); // Salva formatado
+                    novoCliente.setTelefone(telefoneFormatado);
                     return clienteRepository.save(novoCliente);
                 });
 
-        // 4. Lógica do Veículo (idêntica a antes)
         Veiculo veiculo = veiculoRepository.findByPlaca(placa)
                 .orElseGet(() -> {
                     Veiculo novoVeiculo = new Veiculo();
@@ -53,5 +47,4 @@ public class ClienteService {
 
         return veiculo;
     }
-
 }

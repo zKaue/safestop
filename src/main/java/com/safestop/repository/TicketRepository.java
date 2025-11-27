@@ -14,7 +14,6 @@ import java.util.Optional;
 @Repository
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
-    // (Seus métodos antigos, 'countByStatus', 'findByVagaIdAndStatus', etc...)
     long countByStatus(TicketStatus status);
     Ticket findByVagaIdAndStatus(Long vagaId, TicketStatus status);
     List<Ticket> findByVeiculoPlaca(String placa);
@@ -22,6 +21,10 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     List<Ticket> findByStatusAndVeiculoPlacaStartingWithIgnoreCase(TicketStatus status, String placa);
     Optional<Ticket> findByVeiculoPlacaAndStatus(String placa, TicketStatus status);
 
+    /**
+     * Busca tickets por status aplicando filtro parcial na Placa OU no Nome do Cliente.
+     * Utilizado na barra de busca do Dashboard.
+     */
     @Query("SELECT t FROM Ticket t JOIN t.veiculo v JOIN v.cliente c " +
             "WHERE t.status = :status AND " +
             "(LOWER(v.placa) LIKE LOWER(CONCAT(:termo, '%')) OR " +
@@ -30,9 +33,8 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
             @Param("status") TicketStatus status,
             @Param("termo") String termo);
 
-
     /**
-     * Soma o valor de todos os tickets FECHADOS entre um horário de início e fim.
+     * Calcula o faturamento total (soma dos valores) de tickets fechados no período especificado.
      */
     @Query("SELECT SUM(t.valor) FROM Ticket t " +
             "WHERE t.status = 'FECHADO' AND t.horarioSaida BETWEEN :inicio AND :fim")
@@ -40,14 +42,12 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
                                      @Param("fim") LocalDateTime fim);
 
     /**
-     * === NOVO MÉTODO (Tickets Fechados) ===
-     * Conta quantos tickets foram FECHADOS entre as datas.
+     * Contabiliza o total de saídas (tickets fechados) no período.
      */
     Long countByStatusAndHorarioSaidaBetween(TicketStatus status, LocalDateTime inicio, LocalDateTime fim);
 
     /**
-     * === NOVO MÉTODO (Novas Entradas) ===
-     * Conta quantos tickets foram ABERTOS (pela data de entrada) entre as datas.
+     * Contabiliza o total de entradas (tickets abertos) no período.
      */
     Long countByHorarioEntradaBetween(LocalDateTime inicio, LocalDateTime fim);
 }

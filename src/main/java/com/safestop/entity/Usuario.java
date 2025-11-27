@@ -7,6 +7,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Representa os operadores do sistema (Administradores e Funcionários).
+ * Contém credenciais de acesso, flag de permissão (isAdmin) e utilitários de formatação.
+ */
 @Entity
 @Getter
 @Setter
@@ -33,12 +37,11 @@ public class Usuario {
     @Column(nullable = false)
     private boolean isAdmin;
 
-    // --- ESTE CAMPO ESTAVA FALTANDO ---
     @Column(nullable = false)
     private boolean ativo = true;
 
     /**
-     * Getter para o HTML (mostra formatado)
+     * Retorna o telefone formatado para exibição (View).
      */
     @Transient
     public String getTelefoneFormatado() {
@@ -46,14 +49,13 @@ public class Usuario {
     }
 
     /**
-     * Getter para o formulário de EDIÇÃO (mostra só os dígitos)
+     * Retorna apenas os dígitos do telefone para formulários de edição.
      */
     @Transient
     public String getTelefoneSemFormatacao() {
         if (this.telefone == null) {
             return "";
         }
-        // Remove tudo que não for dígito
         return this.telefone.replaceAll("\\D", "");
     }
 }

@@ -1,11 +1,11 @@
 package com.safestop.service;
 
-import com.safestop.entity.Configuracao; // <-- 1. IMPORTADO
+import com.safestop.entity.Configuracao;
 import com.safestop.entity.Ticket;
 import com.safestop.entity.Vaga;
 import com.safestop.entity.Veiculo;
 import com.safestop.enums.TicketStatus;
-import com.safestop.repository.ConfiguracaoRepository; // <-- 2. IMPORTADO
+import com.safestop.repository.ConfiguracaoRepository;
 import com.safestop.repository.TicketRepository;
 import com.safestop.repository.VagaRepository;
 import com.safestop.repository.VeiculoRepository;
@@ -17,7 +17,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Service
 public class TicketService {
@@ -31,15 +30,11 @@ public class TicketService {
     @Autowired
     private VagaRepository vagaRepository;
 
-    // 3. INJETAMOS O NOVO REPOSITÓRIO DO "COFRE"
     @Autowired
     private ConfiguracaoRepository configuracaoRepository;
 
-    // 4. AS LINHAS 'static final' FORAM REMOVIDAS DAQUI
-    //
-
     /**
-     * Lógica de Registrar Entrada (você já tem)
+     * Valida se a vaga está livre e registra o início da estadia.
      */
     @Transactional
     public Ticket registrarEntrada(Veiculo veiculo, Long vagaId) {
@@ -62,91 +57,39 @@ public class TicketService {
     }
 
     /**
-     * Fecha um ticket (dá saída no veículo) e calcula o valor.
-     * (Este método já existia)
+     * Calcula o valor devido até o momento presente, sem fechar o ticket.
+     * Usado para exibir a prévia na tela de saída.
      */
-    public Ticket fecharTicket(Long ticketId) {
-        // 1. Encontra o ticket
+    public Ticket calcularValorAtual(Long ticketId) {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new RuntimeException("Ticket não encontrado"));
 
-        // 2. Define os horários
-        ticket.setHorarioSaida(LocalDateTime.now());
-        ticket.setStatus(TicketStatus.FECHADO);
-
-        // 3. === A MUDANÇA ESTÁ AQUI ===
-        //    Ele agora chama o 'calcularValor' ATUALIZADO
-        double valor = calcularValor(ticket.getHorarioEntrada(), ticket.getHorarioSaida());
+        double valor = calcularValor(ticket.getHorarioEntrada(), LocalDateTime.now());
         ticket.setValor(valor);
 
-        return ticketRepository.save(ticket);
+        return ticket;
     }
 
     /**
-     * === MÉTODO ATUALIZADO (Lógica de Preço Dinâmica) ===
-     * Método PRIVADO com a sua regra de negócio de preço.
+     * Finaliza o ticket: define horário de saída, calcula valor final (aplicando descontos)
+     * e altera o status para FECHADO.
      */
-    private double calcularValor(LocalDateTime entrada, LocalDateTime saida) {
-
-        // 1. Busca as regras de negócio do BANCO DE DADOS
-        Configuracao config = configuracaoRepository.findById(1L)
-                .orElseThrow(() -> new RuntimeException("Configuração do sistema (ID=1) não encontrada!"));
-
-        double valorPorHora = config.getValorPorHora();
-        long minutosDeTolerancia = config.getMinutosTolerancia();
-
-
-        Duration duracao = Duration.between(entrada, saida);
-        long minutosTotais = duracao.toMinutes();
-
-        // 2. Regra dos minutos grátis (agora dinâmica)
-        if (minutosTotais <= minutosDeTolerancia) {
-            return 0.0;
-        }
-
-        // 3. Regra do arredondamento (idêntica)
-        double horasFracionadas = minutosTotais / 60.0;
-        long horasCobradas = (long) Math.ceil(horasFracionadas);
-
-        // 4. Retorna o valor final (agora dinâmico)
-        return horasCobradas * valorPorHora;
-    }
-
-    public Ticket calcularValorAtual(Long ticketId) {
-        // 1. Encontra o ticket
-        Ticket ticket = ticketRepository.findById(ticketId)
-                .orElseThrow(() -> new RuntimeException("Ticket não encontrado"));
-
-        // 2. Calcula o valor (usando o método que já lê do DB)
-        double valor = calcularValor(ticket.getHorarioEntrada(), LocalDateTime.now());
-        ticket.setValor(valor); // Define o valor preliminar
-
-        return ticket; // Retorna o ticket com o valor calculado
-    }
-
     @Transactional
     public Ticket confirmarSaida(Long ticketId, Double descontoReais) {
-        // 1. Encontra o ticket
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new RuntimeException("Ticket não encontrado"));
 
-        // 2. Define os horários e status
         ticket.setHorarioSaida(LocalDateTime.now());
         ticket.setStatus(TicketStatus.FECHADO);
 
-        // 3. Calcula o valor BRUTO (usando o método que já lê do DB)
         double valorBruto = calcularValor(ticket.getHorarioEntrada(), ticket.getHorarioSaida());
-
-        // 4. Garante que o desconto não é nulo
         double desconto = (descontoReais != null) ? descontoReais : 0.0;
 
-        // 5. Calcula o valor final
         double valorFinal = valorBruto - desconto;
         if (valorFinal < 0) {
-            valorFinal = 0; // Não pode ser negativo
+            valorFinal = 0;
         }
 
-        // 6. Arredonda para 2 casas decimais (evitar problemas com 0.00001)
         BigDecimal valorFinalFormatado = new BigDecimal(valorFinal)
                 .setScale(2, RoundingMode.HALF_UP);
 
@@ -155,4 +98,28 @@ public class TicketService {
         return ticketRepository.save(ticket);
     }
 
+    /**
+     * Lógica de precificação dinâmica.
+     * Busca tolerância e valor/hora no banco de dados (Configuracao) e aplica a regra de cobrança.
+     */
+    private double calcularValor(LocalDateTime entrada, LocalDateTime saida) {
+
+        Configuracao config = configuracaoRepository.findById(1L)
+                .orElseThrow(() -> new RuntimeException("Configuração do sistema (ID=1) não encontrada!"));
+
+        double valorPorHora = config.getValorPorHora();
+        long minutosDeTolerancia = config.getMinutosTolerancia();
+
+        Duration duracao = Duration.between(entrada, saida);
+        long minutosTotais = duracao.toMinutes();
+
+        if (minutosTotais <= minutosDeTolerancia) {
+            return 0.0;
+        }
+
+        double horasFracionadas = minutosTotais / 60.0;
+        long horasCobradas = (long) Math.ceil(horasFracionadas);
+
+        return horasCobradas * valorPorHora;
+    }
 }

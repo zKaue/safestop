@@ -21,19 +21,17 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.Optional;
-
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
 @RequestMapping("/admin")
@@ -52,8 +50,9 @@ public class AdminController {
     @Autowired
     private UsuarioService usuarioService;
 
-    // --- (Todos os seus métodos de Vagas, Funcionários e Configs estão aqui) ---
-    // ... (getGerenciarVagas, salvarNovoFuncionario, etc.) ...
+    // ---------------------------------------------------------
+    // GERENCIAMENTO DE VAGAS
+    // ---------------------------------------------------------
 
     @GetMapping("/vagas")
     public String getGerenciarVagas(Model model,
@@ -144,8 +143,7 @@ public class AdminController {
         if (vagaOpt.isEmpty()) {
             return "redirect:/admin/vagas";
         }
-        Vaga vagaParaEditar = vagaOpt.get();
-        model.addAttribute("vaga", vagaParaEditar);
+        model.addAttribute("vaga", vagaOpt.get());
         model.addAttribute("tiposDeVaga", TipoVaga.values());
         return "admin-vaga-editar-form";
     }
@@ -156,6 +154,10 @@ public class AdminController {
         vagaService.atualizarTipoVaga(id, tipo);
         return "redirect:/admin/vagas";
     }
+
+    // ---------------------------------------------------------
+    // CONFIGURAÇÕES GERAIS
+    // ---------------------------------------------------------
 
     @GetMapping("/configuracoes")
     public String getFormConfiguracoes(Model model) {
@@ -171,6 +173,10 @@ public class AdminController {
         configuracaoRepository.save(config);
         return "redirect:/";
     }
+
+    // ---------------------------------------------------------
+    // GERENCIAMENTO DE FUNCIONÁRIOS
+    // ---------------------------------------------------------
 
     @GetMapping("/funcionarios")
     public String getGerenciarFuncionarios(Model model) {
@@ -235,8 +241,13 @@ public class AdminController {
         return "redirect:/admin/funcionarios";
     }
 
+    // ---------------------------------------------------------
+    // RELATÓRIOS
+    // ---------------------------------------------------------
+
     /**
-     * === MÉTODO ATUALIZADO (Dashboard de Relatórios Fixo) ===
+     * Gera relatório financeiro e operacional com base em um intervalo de datas.
+     * Se nenhuma data for informada, utiliza o dia atual (Hoje).
      */
     @GetMapping("/relatorios")
     public String getRelatorios(
@@ -244,11 +255,9 @@ public class AdminController {
             @RequestParam(value = "dataFim", required = false) String dataFimStr,
             Model model) {
 
-        // 1. === NOVA LÓGICA DE DATAS PADRÃO ===
         LocalDate inicio;
         LocalDate fim;
 
-        // Se o usuário NÃO filtrou, define o padrão como "Hoje"
         if (dataInicioStr == null || dataInicioStr.isEmpty()) {
             inicio = LocalDate.now();
         } else {
@@ -260,40 +269,31 @@ public class AdminController {
         } else {
             fim = LocalDate.parse(dataFimStr);
         }
-        // === FIM DA NOVA LÓGICA ===
 
-        // 2. Valores padrão
         Double faturamentoPeriodo = 0.0;
         Long ticketsFechados = 0L;
         Long novasEntradas = 0L;
         Double valorMedio = 0.0;
 
-        // Converte para LocalDateTime
         LocalDateTime inicioDoDia = inicio.atStartOfDay();
         LocalDateTime fimDoDia = fim.atTime(LocalTime.MAX);
 
-        // 3. Busca os dados do repositório (agora sempre roda)
         Double faturamento = ticketRepository.sumValorFechadoEntreDatas(inicioDoDia, fimDoDia);
         Long fechados = ticketRepository.countByStatusAndHorarioSaidaBetween(TicketStatus.FECHADO, inicioDoDia, fimDoDia);
         Long entradas = ticketRepository.countByHorarioEntradaBetween(inicioDoDia, fimDoDia);
 
-        // 4. Atualiza os valores (com segurança)
         faturamentoPeriodo = (faturamento != null) ? faturamento : 0.0;
         ticketsFechados = (fechados != null) ? fechados : 0L;
         novasEntradas = (entradas != null) ? entradas : 0L;
 
-        // 5. Calcula o Valor Médio (com segurança contra divisão por zero)
         if (ticketsFechados > 0) {
             valorMedio = faturamentoPeriodo / ticketsFechados;
         }
 
-        // 6. Envia os 4 KPIs de volta para o HTML
         model.addAttribute("faturamentoPeriodo", faturamentoPeriodo);
         model.addAttribute("ticketsFechados", ticketsFechados);
         model.addAttribute("novasEntradas", novasEntradas);
         model.addAttribute("valorMedio", valorMedio);
-
-        // 7. Envia as datas de volta (agora sempre terão um valor)
         model.addAttribute("dataInicioPesquisada", inicio.toString());
         model.addAttribute("dataFimPesquisada", fim.toString());
 

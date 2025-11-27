@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ConfiguracaoRepository extends JpaRepository<Configuracao, Long> {
-    // O JpaRepository já tem o findById(1L) que precisamos
+    // Gerencia a entidade de configuração global (Singleton ID 1).
 }

@@ -5,7 +5,6 @@ import com.safestop.repository.UsuarioRepository;
 import com.safestop.util.FormatadorUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-// === IMPORT ADICIONADO ===
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,19 +21,18 @@ public class UsuarioService implements UserDetailsService {
     private UsuarioRepository usuarioRepository;
 
     /**
-     * Método de login do Spring Security
+     * Método obrigatório do Spring Security.
+     * Busca o usuário no DB e converte para o objeto 'User' do Spring.
+     * Inclui verificação extra: se o usuário estiver inativo, bloqueia o login.
      */
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário ou senha inválido"));
 
-        // === LÓGICA DE LOGIN ATUALIZADA ===
         if (!usuario.isAtivo()) {
-            // Lança a exceção específica para "Conta Desativada"
             throw new DisabledException("Sua conta está desativada. Fale com um administrador.");
         }
-        // === FIM DA MUDANÇA ===
 
         return User.builder()
                 .username(usuario.getEmail())
@@ -43,9 +41,10 @@ public class UsuarioService implements UserDetailsService {
                 .build();
     }
 
-    // ... (O resto dos seus métodos 'toggleAtivoStatus', 'atualizarFuncionario' e 'salvarNovoFuncionario' continuam aqui, perfeitos) ...
+    /**
+     * Ativa/Desativa um funcionário. Impede que o próprio admin se desative.
+     */
     public boolean toggleAtivoStatus(Long usuarioId, String emailDoAdminLogado) {
-
         Optional<Usuario> usuarioOpt = usuarioRepository.findById(usuarioId);
         if (usuarioOpt.isEmpty()) {
             return false;
@@ -63,7 +62,6 @@ public class UsuarioService implements UserDetailsService {
     }
 
     public void atualizarFuncionario(Usuario usuarioDoForm) {
-
         Usuario usuarioDoBanco = usuarioRepository.findById(usuarioDoForm.getId())
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado para atualizar"));
 
@@ -79,26 +77,20 @@ public class UsuarioService implements UserDetailsService {
 
         usuarioDoBanco.setNome(usuarioDoForm.getNome());
         usuarioDoBanco.setEmail(emailNovo);
-
-        String telefoneFormatado = FormatadorUtils.formatarTelefone(usuarioDoForm.getTelefone());
-        usuarioDoBanco.setTelefone(telefoneFormatado);
-
+        usuarioDoBanco.setTelefone(FormatadorUtils.formatarTelefone(usuarioDoForm.getTelefone()));
         usuarioDoBanco.setAdmin(usuarioDoForm.isAdmin());
 
         usuarioRepository.save(usuarioDoBanco);
     }
 
     public void salvarNovoFuncionario(Usuario novoUsuario) {
-
         Optional<Usuario> outroUsuario = usuarioRepository.findByEmail(novoUsuario.getEmail());
         if (outroUsuario.isPresent()) {
             throw new DataIntegrityViolationException("Email duplicado");
         }
 
-        String telefoneFormatado = FormatadorUtils.formatarTelefone(novoUsuario.getTelefone());
-        novoUsuario.setTelefone(telefoneFormatado);
-
-        novoUsuario.setAtivo(false); // Corrigido: novos usuários começam inativos
+        novoUsuario.setTelefone(FormatadorUtils.formatarTelefone(novoUsuario.getTelefone()));
+        novoUsuario.setAtivo(false); // Novos cadastros aguardam aprovação
 
         usuarioRepository.save(novoUsuario);
     }

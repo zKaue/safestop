@@ -6,6 +6,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Representa o automóvel.
+ * Identificado pela placa e vinculado obrigatoriamente a um Cliente proprietário.
+ */
 @Entity
 @Getter
 @Setter

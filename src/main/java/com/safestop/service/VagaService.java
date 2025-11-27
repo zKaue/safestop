@@ -1,7 +1,6 @@
 package com.safestop.service;
 
 import com.safestop.dto.DashboardStatsDTO;
-import com.safestop.entity.Configuracao;
 import com.safestop.entity.Ticket;
 import com.safestop.entity.Vaga;
 import com.safestop.enums.PrefixoAndar;
@@ -12,15 +11,11 @@ import com.safestop.repository.TicketRepository;
 import com.safestop.repository.VagaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.Duration;
-import java.time.LocalDate; // <-- IMPORT ADICIONADO
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime; // <-- IMPORT ADICIONADO
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -36,23 +31,14 @@ public class VagaService {
     @Autowired
     private TicketRepository ticketRepository;
 
-    @Autowired
-    private ConfiguracaoRepository configuracaoRepository;
-
-    // --- (getNumeroDeVagasLivres) ---
-    public long getNumeroDeVagasLivres() {
-        long totalVagasAtivas = vagaRepository.countByAtivo(true);
-        long vagasOcupadas = ticketRepository.countByStatus(TicketStatus.ABERTO);
-        return totalVagasAtivas - vagasOcupadas;
-    }
-
     /**
-     * === MÉTODO ATUALIZADO (com Faturamento Diário) ===
+     * Compila todos os KPIs para o Dashboard principal:
+     * Contagem de vagas, ocupação, lista de carros estacionados e faturamento do dia.
      */
     public DashboardStatsDTO getDashboardStats(String termoBusca) {
         DashboardStatsDTO stats = new DashboardStatsDTO();
 
-        // 1. Estatísticas de Vagas
+        // 1. Estatísticas de Ocupação
         long totalVagas = vagaRepository.countByAtivo(true);
         long vagasOcupadas = ticketRepository.countByStatus(TicketStatus.ABERTO);
         long vagasLivres = totalVagas - vagasOcupadas;
@@ -61,7 +47,7 @@ public class VagaService {
             percentual = ((double) vagasOcupadas / totalVagas) * 100.0;
         }
 
-        // 2. Lógica de Busca de Tickets
+        // 2. Lista de Tickets (com suporte a busca)
         List<Ticket> ticketsAbertos;
         if (StringUtils.hasText(termoBusca)) {
             ticketsAbertos = ticketRepository
@@ -70,26 +56,25 @@ public class VagaService {
             ticketsAbertos = ticketRepository.findByStatus(TicketStatus.ABERTO);
         }
 
-        // 3. === A NOVA LÓGICA DE FATURAMENTO DIÁRIO ===
-        LocalDateTime inicioDoDia = LocalDate.now().atStartOfDay(); // Ex: Hoje às 00:00:00
-        LocalDateTime fimDoDia = LocalDate.now().atTime(LocalTime.MAX); // Ex: Hoje às 23:59:59
+        // 3. Faturamento Diário (Hoje)
+        LocalDateTime inicioDoDia = LocalDate.now().atStartOfDay();
+        LocalDateTime fimDoDia = LocalDate.now().atTime(LocalTime.MAX);
 
         Double faturamentoHoje = ticketRepository.sumValorFechadoEntreDatas(inicioDoDia, fimDoDia);
 
-        // 4. Preenche o DTO
         stats.setTotalVagas(totalVagas);
         stats.setVagasLivres(vagasLivres);
         stats.setVagasOcupadas(vagasOcupadas);
         stats.setPercentualOcupacao(percentual);
         stats.setTicketsAbertos(ticketsAbertos);
-
-        // Se for nulo (nenhuma venda), define como 0.0
         stats.setFaturamentoDiario(faturamentoHoje != null ? faturamentoHoje : 0.0);
 
         return stats;
     }
 
-    // --- (criarNovaVagaAutomatica) ---
+    /**
+     * Cria uma única vaga encontrando automaticamente o próximo número disponível para o prefixo.
+     */
     public void criarNovaVagaAutomatica(PrefixoAndar prefixo, TipoVaga tipo) {
         String prefixoBusca = prefixo.name() + "-";
         Vaga ultimaVaga = vagaRepository
@@ -109,7 +94,9 @@ public class VagaService {
         vagaRepository.save(novaVaga);
     }
 
-    // --- (criarVagasEmMassa) ---
+    /**
+     * Cria múltiplas vagas sequenciais de uma vez.
+     */
     public void criarVagasEmMassa(PrefixoAndar prefixo, int quantidade, TipoVaga tipo) {
         String prefixoBusca = prefixo.name() + "-";
         Vaga ultimaVaga = vagaRepository
@@ -134,7 +121,9 @@ public class VagaService {
         vagaRepository.saveAll(vagasParaSalvar);
     }
 
-    // --- (toggleAtivoStatus) ---
+    /**
+     * Ativa/Desativa uma vaga. Retorna false se a vaga estiver ocupada (não pode desativar).
+     */
     public boolean toggleAtivoStatus(Long vagaId) {
         Optional<Vaga> vagaOpt = vagaRepository.findById(vagaId);
         if (vagaOpt.isEmpty()) {
@@ -153,27 +142,26 @@ public class VagaService {
         return true;
     }
 
-    // --- (getVagasDisponiveis) ---
+    /**
+     * Retorna apenas as vagas que estão ativas e SEM tickets abertos no momento.
+     */
     public List<Vaga> getVagasDisponiveis() {
         Set<Long> idsVagasEmUso = ticketRepository.findByStatus(TicketStatus.ABERTO)
                 .stream()
                 .map(ticket -> ticket.getVaga().getId())
                 .collect(Collectors.toSet());
         List<Vaga> vagasAtivas = vagaRepository.findByAtivoOrderByNumeroVagaAsc(true);
-        List<Vaga> vagasDisponiveis = vagasAtivas.stream()
+        return vagasAtivas.stream()
                 .filter(vaga -> !idsVagasEmUso.contains(vaga.getId()))
                 .collect(Collectors.toList());
-        return vagasDisponiveis;
     }
 
-    // --- (atualizarTipoVaga) ---
     public void atualizarTipoVaga(Long vagaId, TipoVaga novoTipo) {
         Optional<Vaga> vagaOpt = vagaRepository.findById(vagaId);
-        if (vagaOpt.isEmpty()) {
-            return;
+        if (vagaOpt.isPresent()) {
+            Vaga vaga = vagaOpt.get();
+            vaga.setTipo(novoTipo);
+            vagaRepository.save(vaga);
         }
-        Vaga vaga = vagaOpt.get();
-        vaga.setTipo(novoTipo);
-        vagaRepository.save(vaga);
     }
 }

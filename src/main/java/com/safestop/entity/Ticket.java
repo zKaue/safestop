@@ -9,6 +9,11 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
+/**
+ * Representa a sessão de estacionamento.
+ * Vincula um veículo a uma vaga, registrando horários de entrada/saída,
+ * valor calculado e o status atual (Aberto/Fechado).
+ */
 @Entity
 @Getter
 @Setter

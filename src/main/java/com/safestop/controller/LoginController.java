@@ -17,17 +17,15 @@ public class LoginController {
     @Autowired
     private UsuarioService usuarioService;
 
-    /**
-     * Mostra a página de login/registro
-     */
     @GetMapping("/login")
     public String getLoginPage(Model model) {
         model.addAttribute("usuario", new Usuario());
-        return "login"; // -> /templates/login.html
+        return "login";
     }
 
     /**
-     * Processa o formulário de REGISTRO
+     * Registra um novo usuário (sem permissão de Admin e inativo por padrão).
+     * Trata exceção de e-mail duplicado.
      */
     @PostMapping("/register")
     public String registerNewUser(@ModelAttribute Usuario usuario, RedirectAttributes redirectAttributes) {
@@ -40,7 +38,6 @@ public class LoginController {
                     "Conta criada! Aguarde um administrador ativar seu login.");
 
         } catch (DataIntegrityViolationException e) {
-            // === MENSAGEM CORRIGIDA (SEM "Erro:") ===
             redirectAttributes.addFlashAttribute("errorMessage",
                     "Este email já está em uso!");
         }

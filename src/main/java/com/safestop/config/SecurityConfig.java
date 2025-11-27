@@ -7,17 +7,20 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-// O import do AntPathRequestMatcher foi removido
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
+    /**
+     * Configura a cadeia de filtros de segurança, definindo quais rotas são públicas,
+     * o comportamento do formulário de login/logout e desativando proteções (CSRF/Frames) 
+     * para compatibilidade com o console H2.
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        // --- REGRAS CORRIGIDAS (sem 'AntPathRequestMatcher') ---
                         .requestMatchers(
                                 "/",
                                 "/h2-console/**",
@@ -29,21 +32,18 @@ public class SecurityConfig {
                                 "/login",
                                 "/register"
                         ).permitAll()
-
-                        // Exige autenticação para QUALQUER outra URL
                         .anyRequest().authenticated()
                 )
-                // DIZ AO SPRING ONDE ESTÁ NOSSA PÁGINA DE LOGIN
                 .formLogin(form -> form
-                        .loginPage("/login") // Nossa página de login customizada
-                        .loginProcessingUrl("/login") // A URL que o <form> envia (padrão)
-                        .defaultSuccessUrl("/", true) // Para onde vai depois do login
-                        .failureUrl("/login?error=true") // Para onde vai se o login FALHAR
+                        .loginPage("/login")
+                        .loginProcessingUrl("/login")
+                        .defaultSuccessUrl("/", true)
+                        .failureUrl("/login?error=true")
                         .permitAll()
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login?logout") // Volta para o login
+                        .logoutSuccessUrl("/login?logout")
                         .permitAll()
                 );
 
@@ -53,6 +53,10 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /**
+     * Define o encoder de senhas da aplicação.
+     * Retorna NoOpPasswordEncoder (sem criptografia) para fins de desenvolvimento.
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return (NoOpPasswordEncoder) NoOpPasswordEncoder.getInstance();

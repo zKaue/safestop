@@ -24,6 +24,10 @@ public class ApiVeiculoController {
     @Autowired
     private TicketRepository ticketRepository;
 
+    /**
+     * Busca dados do veículo pela placa.
+     * Retorna Erro 409 se o veículo já estiver estacionado (ticket aberto).
+     */
     @GetMapping("/api/veiculo/{placa}")
     public ResponseEntity<?> getVeiculoPorPlaca(@PathVariable String placa) {
 
@@ -38,7 +42,6 @@ public class ApiVeiculoController {
         Optional<Veiculo> veiculoOpt = veiculoRepository.findByPlaca(placa);
 
         if (veiculoOpt.isPresent()) {
-            // O DTO agora só tem os campos que queremos
             VeiculoClienteDTO dto = new VeiculoClienteDTO(veiculoOpt.get());
             return ResponseEntity.ok(dto);
         } else {
