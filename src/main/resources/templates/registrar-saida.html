@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Confirmar Saída</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        /* Estilo para o 'Valor Final' */
+        .valor-final-display {
+            color: var(--cor-destaque);
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0;
+            text-align: right;
+        }
+        /* Estilo para inputs desabilitados */
+        input:disabled {
+            background-color: var(--cor-borda);
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="header-nav">
+    <div class="header-brand">SafeStop</div>
+    <a th:href="@{/}" class="btn btn-detalhes">Voltar ao Dashboard</a>
+</nav>
+
+<div class="section-card">
+    <div class="section-header">
+        <h2>Confirmar Saída</h2>
+    </div>
+
+    <form th:action="@{/ticket/confirmar-saida}" method="post" class="form-container">
+
+        <input type="hidden" name="ticketId" th:value="${ticket.id}" />
+
+        <div class="form-group">
+            <label>Placa</label>
+            <input type="text" th:value="${ticket.veiculo.placa}" class="form-control-massa" disabled />
+        </div>
+        <div class="form-group">
+            <label>Cliente</label>
+            <input type="text" th:value="${ticket.veiculo.cliente.nome}" class="form-control-massa" disabled />
+        </div>
+        <div class="form-group">
+            <label>Tempo Estacionado</label>
+            <input type="text" th:value="${tempoTotal}" class="form-control-massa" disabled />
+        </div>
+        <div class="form-group">
+            <label>Valor Bruto (R$)</label>
+            <input type="number" id="valor-bruto" th:value="${ticket.valor}" class="form-control-massa" disabled />
+        </div>
+
+        <hr style="border-color: var(--cor-borda);">
+
+        <div class="form-group">
+            <label for="descontoPercentual">Desconto (%)</label>
+            <input type="number" id="descontoPercentual" name="descontoPercentual"
+                   class="form-control-massa" min="0" max="100" step="0.1" placeholder="Ex: 10">
+        </div>
+
+        <div class="form-group">
+            <label for="descontoReais">Desconto (R$)</label>
+            <input type="number" id="descontoReais" name="descontoReais"
+                   class="form-control-massa" min="0" step="0.01" placeholder="Ex: 1.50">
+        </div>
+
+        <div class="form-group" style="margin-top: 1rem;">
+            <label>VALOR FINAL A PAGAR:</label>
+            <h2 id="valor-final" class="valor-final-display">R$ 0.00</h2>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-detalhes">Confirmar e Fechar Ticket</button>
+        </div>
+
+    </form>
+</div>
+
+<script>
+    // Espera o HTML carregar
+    document.addEventListener("DOMContentLoaded", function() {
+
+        // Pega os elementos
+        const valorBrutoEl = document.getElementById('valor-bruto');
+        const inputPercent = document.getElementById('descontoPercentual');
+        const inputReais = document.getElementById('descontoReais');
+        const displayFinal = document.getElementById('valor-final');
+
+        const valorBruto = parseFloat(valorBrutoEl.value);
+
+        // Função para calcular e mostrar o valor final
+        function calcularValorFinal() {
+            // Pega o desconto em R$ (ou 0 se estiver vazio)
+            const descontoReais = parseFloat(inputReais.value) || 0;
+
+            let final = valorBruto - descontoReais;
+            if (final < 0) {
+                final = 0; // Não pode pagar valor negativo
+            }
+
+            // Formata como moeda (BRL)
+            displayFinal.textContent = final.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        // --- Os "Ouvintes" ---
+
+        // 1. Se o usuário digitar no campo (%)
+        inputPercent.addEventListener('input', function() {
+            const percent = parseFloat(inputPercent.value) || 0;
+
+            // Calcula o valor em R$ correspondente
+            const descontoEmReais = (valorBruto * percent) / 100;
+
+            // Atualiza o outro campo (R$)
+            inputReais.value = descontoEmReais.toFixed(2);
+
+            // Atualiza o display final
+            calcularValorFinal();
+        });
+
+        // 2. Se o usuário digitar no campo (R$)
+        inputReais.addEventListener('input', function() {
+            const reais = parseFloat(inputReais.value) || 0;
+
+            // Calcula o valor em % correspondente
+            // (Evita divisão por zero se o valor bruto for 0)
+            const descontoEmPercent = (valorBruto > 0) ? (reais / valorBruto) * 100 : 0;
+
+            // Atualiza o outro campo (%)
+            inputPercent.value = descontoEmPercent.toFixed(2);
+
+            // Atualiza o display final
+            calcularValorFinal();
+        });
+
+        // 3. Roda a função uma vez no início para mostrar o valor total
+        calcularValorFinal();
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalhes do Ticket</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        /* Estilo para o 'Valor Atual' */
+        .valor-atual-display {
+            color: var(--cor-destaque);
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0;
+        }
+        /* Estilo para inputs desabilitados */
+        input:disabled {
+            background-color: var(--cor-borda);
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="header-nav">
+    <div class="header-brand">SafeStop</div>
+    <a th:href="@{/}" class="btn btn-detalhes">Voltar ao Dashboard</a>
+</nav>
+
+<div class="section-card">
+    <div class="section-header">
+        <h2>Detalhes do Ticket</h2>
+    </div>
+
+    <div class="form-container">
+
+        <div class="form-group">
+            <label>Placa</label>
+            <input type="text" th:value="${ticket.veiculo.placa}" class="form-control-massa" disabled />
+        </div>
+        <div class="form-group">
+            <label>Cliente</label>
+            <input type="text" th:value="${ticket.veiculo.cliente.nome}" class="form-control-massa" disabled />
+        </div>
+        <div class="form-group">
+            <label>Telefone</label>
+            <input type="text" th:value="${ticket.veiculo.cliente.telefone}" class="form-control-massa" disabled />
+        </div>
+        <div class="form-group">
+            <label>Vaga</label>
+            <input type="text" th:value="${ticket.vaga.numeroVaga}" class="form-control-massa" disabled />
+        </div>
+
+        <hr style="border-color: var(--cor-borda);">
+
+        <div class="form-group">
+            <label>Entrada</label>
+            <input type="text" th:value="${#temporals.format(ticket.horarioEntrada, 'dd/MM/yyyy HH:mm')}" class="form-control-massa" disabled />
+        </div>
+        <div class="form-group">
+            <label>Tempo Estacionado</label>
+            <input type="text" th:value="${tempoTotal}" class="form-control-massa" disabled />
+        </div>
+
+        <div class="form-group" style="margin-top: 1rem;">
+            <label>VALOR ATUAL:</label>
+            <h2 class="valor-atual-display" th:text="'R$ ' + ${#numbers.formatDecimal(ticket.valor, 1, 2)}">
+                R$ 0,00
+            </h2>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

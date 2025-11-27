@@ -1,0 +1,409 @@
+/* === PALETA DE CORES "FODA" 2.0 (Corrigida) === */
+:root {
+    /* Um fundo "dark mode" profissional, não é preto, é ardósia */
+    --cor-bg: #1F2937;          /* Fundo (Azul-Ardósia Escuro) */
+    --cor-card: #374151;        /* Fundo dos Cards (Ardósia Médio) */
+    --cor-borda: #4B5563;       /* Bordas e Divisórias (Ardósia Claro) */
+
+    /* Suas cores de logo, usadas como acentos */
+    --cor-destaque: #5AA83A;         /* Verde Principal (Seu Logo) */
+    --cor-destaque-hover: #337D30;   /* Verde Secundário (Seu Logo) */
+
+    /* Cores de texto padrão para dark mode */
+    --cor-texto: #E5E7EB;           /* Texto principal (Branco suave) */
+    --cor-texto-muted: #9CA3AF;     /* Texto secundário (Cinza) */
+    --cor-texto-branco: #FFFFFF;    /* Texto de alto contraste */
+
+    /* Cores de Ação */
+    --cor-perigo: #c0392b;           /* Vermelho (Botão Saída) */
+    --cor-perigo-hover: #e74c3c;
+
+    /* --- NOVAS MELHORIAS (COM A CORREÇÃO) --- */
+
+    /* 1. Sombra em "camadas" para um efeito 3D mais suave */
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+
+    /* 2. Borda arredondada */
+    --border-radius: 0.5rem; /* 8px */
+}
+
+/* --- Configurações Globais --- */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: var(--cor-bg);
+    color: var(--cor-texto);
+    margin: 0;
+
+    /* Espaçamento consistente */
+    padding: 1.5rem; /* 24px */
+
+    /* Altura do Header (56px) + Padding do Body (24px) = 80px */
+    padding-top: calc(3.5rem + 1.5rem);
+}
+
+/* --- Cards de Estatísticas --- */
+.stats-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem; /* 20px */
+    margin-bottom: 0;
+}
+
+.stat-card {
+    background-color: var(--cor-bg);
+    padding: 1.5rem; /* 24px */
+    border-radius: var(--border-radius);
+    flex-grow: 1;
+    min-width: 200px;
+    text-align: center;
+    border: 1px solid var(--cor-borda);
+    box-shadow: var(--shadow-md); /* Sombra mais suave */
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg); /* Efeito de "levantar" mais pronunciado */
+}
+
+.stat-card h3 {
+    margin-top: 0;
+    font-size: 1.125rem; /* 18px */
+    color: var(--cor-destaque);
+}
+
+.stat-card p {
+    font-size: 2.25rem; /* 36px */
+    font-weight: 700; /* Mais peso */
+    margin: 0;
+    color: var(--cor-texto-branco);
+}
+
+.stat-card p.small {
+    font-size: 1.5rem; /* 24px */
+}
+
+/* --- Tabela de Veículos --- */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+}
+
+th, td {
+    padding: 1rem 1.25rem; /* 16px 20px */
+    text-align: center;
+    border-bottom: 1px solid var(--cor-borda);
+    /* Transição suave ao dar hover na linha */
+    transition: background-color 0.15s ease-in-out;
+}
+
+/* Cabeçalho de Tabela Profissional */
+th {
+    background-color: var(--cor-destaque);
+    color: var(--cor-texto-branco);
+    font-size: 0.75rem; /* 12px */
+    font-weight: 600;
+    text-transform: uppercase; /* Caixa Alta */
+    letter-spacing: 0.05em; /* Espaçamento */
+}
+
+/* Linha de "Nenhum veículo" */
+tr.empty-row td {
+    text-align: center;
+    font-style: italic;
+    padding: 1.5rem; /* 24px */
+    color: var(--cor-texto-muted);
+}
+
+tbody tr:nth-of-type(even) {
+    background-color: transparent;
+}
+tbody tr:hover {
+    background-color: var(--cor-borda); /* Tom de hover mais sutil */
+}
+
+/* --- Botões de Ação --- */
+.btn {
+    display: inline-block;
+    padding: 0.625rem 1rem; /* 10px 16px */
+    border-radius: var(--border-radius);
+    text-decoration: none;
+    color: var(--cor-texto-branco);
+    font-weight: 600;
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.5; /* Altura de linha consistente */
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-detalhes {
+    background-color: var(--cor-destaque);
+    box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+}
+.btn-detalhes:hover {
+    background-color: var(--cor-destaque-hover);
+    transform: translateY(-1px); /* Efeito sutil de clique */
+}
+
+.btn-saida {
+    background-color: var(--cor-perigo);
+    box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+}
+.btn-saida:hover {
+    background-color: var(--cor-perigo-hover);
+    transform: translateY(-1px);
+}
+
+/* --- Estilos do Header --- */
+.header-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: var(--cor-card);
+    border-bottom: 1px solid var(--cor-borda);
+    padding: 0.75rem 1.5rem; /* 12px 24px (Mais fino) */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    min-height: 3.5rem; /* 56px (Mais fino) */
+}
+
+.header-brand {
+    color: var(--cor-destaque);
+    font-size: 1.25rem; /* 20px */
+    font-weight: 700;
+}
+
+/* --- Cards de Seção --- */
+.section-card {
+    background-color: var(--cor-card);
+    border-radius: var(--border-radius);
+    padding: 1.5rem; /* 24px */
+    margin-top: 2rem; /* 32px */
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--cor-borda);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0;
+    border-bottom: 1px solid var(--cor-borda);
+    padding-bottom: 1.5rem; /* 24px */
+}
+
+.section-card h2 {
+    color: var(--cor-destaque);
+    margin: 0;
+    border: none;
+    padding: 0;
+    font-size: 1.5rem; /* 24px */
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem; /* 12px */
+}
+
+.actions-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem; /* 12px */
+}
+
+/* --- Estilos da Barra de Busca --- */
+.search-bar {
+    display: flex;
+    gap: 0.75rem; /* 12px */
+    margin-bottom: 1.5rem; /* 24px (Restaurado) */
+}
+
+/* Inputs e Selects (Regra unificada) */
+.search-bar input,
+.form-group select,
+.form-control-massa,
+.filter-bar .form-group select,
+.filter-bar .filtro-container select {
+    padding: 0.625rem 0.75rem; /* 10px 12px */
+    font-size: 1rem; /* 16px */
+    color: var(--cor-texto);
+    background-color: var(--cor-bg);
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--border-radius);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    -webkit-appearance: none; /* Remove estilo nativo do iOS */
+}
+
+.search-bar input:focus,
+.form-group select:focus,
+.form-control-massa:focus,
+.filter-bar .form-group select:focus,
+.filter-bar .filtro-container select:focus {
+    border-color: var(--cor-destaque);
+    /* Efeito "Glow" sutil ao focar */
+    box-shadow: 0 0 0 3px rgba(90, 168, 58, 0.3);
+}
+
+.search-bar input {
+    flex-grow: 1;
+}
+
+.search-bar button {
+    padding: 0.625rem 1rem; /* 10px 16px */
+    flex-shrink: 0;
+}
+
+/* --- Estilos de Formulário --- */
+.form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem; /* 20px (Espaço entre os campos) */
+    margin-top: 1.25rem; /* 20px (Espaço acima do 1º campo) */
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem; /* 8px */
+}
+
+.form-group label {
+    font-weight: 600; /* Mais peso */
+    font-size: 0.875rem; /* 14px */
+    color: var(--cor-texto-muted);
+}
+
+.form-actions {
+    margin-top: 0.75rem; /* 12px */
+    border-top: 1px solid var(--cor-borda);
+    padding-top: 1.25rem; /* 20px */
+}
+
+/* --- Estilos da Barra de Filtro (Admin) --- */
+.filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem; /* 16px */
+    padding: 1.5rem 0; /* 24px (Agora controla todo o espaço) */
+    align-items: center;
+    border-bottom: 1px solid var(--cor-borda);
+    margin-bottom: 1.5rem; /* 24px */
+}
+
+.filter-bar .form-group select,
+.filter-bar .filtro-container select {
+    min-width: 150px;
+}
+
+.filtro-container {
+    display: flex;
+    gap: 1rem; /* 16px */
+    align-items: center;
+}
+
+.btn-limpar {
+    padding: 0.625rem 1rem; /* 10px 16px */
+    font-size: 0.875rem; /* 14px */
+}
+
+/* --- Estilo da Mensagem de Erro --- */
+.error-message {
+    padding: 1rem;
+
+    /* === CORREÇÃO DE ESPAÇAMENTO === */
+    margin-top: 1rem; /* 24px (Para bater com a msg de sucesso) */
+    margin-bottom: -1.0rem; /* (Para bater com a msg de sucesso) */
+
+    background-color: var(--cor-perigo); /* Fundo vermelho */
+    color: var(--cor-texto-branco);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--cor-perigo-hover);
+    text-align: center;
+    font-weight: 600;
+}
+.error-message p {
+    margin: 0;
+}
+
+/* --- Estilo para Vaga em Uso --- */
+.vaga-em-uso {
+    font-weight: 600;
+    color: var(--cor-perigo); /* Usa o vermelho dos botões */
+}
+
+/* --- Ajuste Fino: Botões da Tabela (Ações) --- */
+.actions-cell {
+    display: flex;
+    gap: 6px; /* Espaço entre os botões */
+    justify-content: center; /* Centraliza o grupo na célula */
+    align-items: center; /* Alinha verticalmente */
+}
+.actions-cell form {
+    margin: 0;
+}
+.actions-cell .btn {
+    width: 130px;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+/* --- Estilo da Mensagem de Sucesso --- */
+.success-message {
+    padding: 1rem;
+    margin-top: 1.5rem; /* 24px */
+    margin-bottom: -1.0rem; /* Puxa o card de baixo para perto */
+    background-color: var(--cor-destaque); /* Fundo VERDE */
+    color: var(--cor-texto-branco);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--cor-destaque-hover);
+    text-align: center;
+    font-weight: 600;
+}
+.success-message p {
+    margin: 0;
+}
+
+/* --- Alteração de Alinhamento do Filtro --- */
+.filter-bar .form-group {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem; /* 12px */
+}
+.filter-bar .form-group label {
+    color: var(--cor-texto);
+    font-size: 1rem; /* 16px */
+    font-weight: 400; /* Peso normal */
+    margin-bottom: 0; /* Remove margem */
+}
+
+
+/* --- CORREÇÕES PARA O FORM DE REGISTRO --- */
+
+/* 1. O 'flex' para alinhar o Label e a Mensagem */
+.label-row {
+    display: flex;
+    /* justify-content: space-between; <-- REMOVIDO (Bug) */
+    align-items: baseline;      /* Alinha o texto */
+    gap: 0.5rem; /* 8px (Espaço entre label e msg) */
+}
+
+/* 2. O estilo da mensagem de erro/status */
+.placa-message-style {
+    font-size: 0.875rem; /* 14px */
+    font-weight: 600;
+}
+
+/* 3. Remove a margem da barra de busca DENTRO de um .form-group */
+.form-group .search-bar {
+    margin-bottom: 0;
+}

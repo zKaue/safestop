@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Gerenciar Vagas</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body onload="mostrarFiltro()">
+
+<nav class="header-nav">
+    <div class="header-brand">SafeStop</div>
+    <a th:href="@{/}" class="btn btn-detalhes">Voltar ao Dashboard</a>
+</nav>
+
+<div class="section-card">
+    <div class="section-header">
+        <h2>Gerenciar Vagas</h2>
+        <div class="actions-bar">
+            <a th:href="@{/admin/vagas/nova}" class="btn btn-detalhes">+ Criar Vaga Única</a>
+            <a th:href="@{/admin/vagas/massa}" class="btn btn-detalhes">+ Criar Vagas em Massa</a>
+        </div>
+    </div>
+
+    <div class="filter-bar">
+        <div class="form-group">
+            <label for="filtro-principal">Filtrar por:</label>
+            <select id="filtro-principal" onchange="mostrarFiltro()">
+                <option value="" th:selected="${filtroPrefixoAtivo == null && filtroTipoAtivo == null && filtroAtivoAtivo == null}">
+                    Mostrar Todos
+                </option>
+                <option value="prefixo" th:selected="${filtroPrefixoAtivo != null}">Prefixo (Andar)</option>
+                <option value="tipo" th:selected="${filtroTipoAtivo != null}">Tipo de Vaga</option>
+                <option value="ativo" th:selected="${filtroAtivoAtivo != null}">Status (Ativa/Inativa)</option>
+            </select>
+        </div>
+
+        <form th:action="@{/admin/vagas}" method="get" class="filtro-container" id="filtro-prefixo" style="display: none;">
+            <select name="filtro_prefixo" onchange="this.form.submit()">
+                <option value="">Selecione um Prefixo...</option>
+                <option th:each="p : ${prefixos}"
+                        th:value="${p.name()}"
+                        th:text="${p.name()}"
+                        th:selected="${p.name() == filtroPrefixoAtivo}"></option>
+            </select>
+            <a th:href="@{/admin/vagas}" class="btn btn-saida btn-limpar">Limpar</a>
+        </form>
+
+        <form th:action="@{/admin/vagas}" method="get" class="filtro-container" id="filtro-tipo" style="display: none;">
+            <select name="filtro_tipo" onchange="this.form.submit()">
+                <option value="">Selecione um Tipo...</option>
+                <option th:each="t : ${tiposDeVaga}"
+                        th:value="${t.name()}"
+                        th:text="${t.name()}"
+                        th:selected="${t.name() == #strings.toString(filtroTipoAtivo)}"></option>
+            </select>
+            <a th:href="@{/admin/vagas}" class="btn btn-saida btn-limpar">Limpar</a>
+        </form>
+
+        <form th:action="@{/admin/vagas}" method="get" class="filtro-container" id="filtro-ativo" style="display: none;">
+            <select name="filtro_ativo" onchange="this.form.submit()">
+                <option value="">Selecione um Status...</option>
+                <option value="true" th:selected="${#strings.toString(filtroAtivoAtivo) == 'true'}">Ativa</option>
+                <option value="false" th:selected="${#strings.toString(filtroAtivoAtivo) == 'false'}">Inativa</option>
+            </select>
+            <a th:href="@{/admin/vagas}" class="btn btn-saida btn-limpar">Limpar</a>
+        </form>
+    </div>
+    <div th:if="${errorMessage}" class="error-message">
+        <p th:text="${errorMessage}">Mensagem de erro aqui</p>
+    </div>
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Número da Vaga</th>
+            <th>Tipo</th>
+            <th>Ativa?</th>
+            <th>Ações</th>
+        </tr>
+        </thead>
+        <tbody>
+
+        <tr th:if="${vagasDTO.isEmpty()}">
+            <td colspan="5" style="text-align: center; padding: 20px;">
+                Nenhuma vaga encontrada para este filtro.
+            </td>
+        </tr>
+
+        <tr th:each="dto : ${vagasDTO}">
+            <td th:text="${dto.vaga.id}">1</td>
+            <td th:text="${dto.vaga.numeroVaga}">A-001</td>
+            <td th:text="${dto.vaga.tipo}">COMUM</td>
+            <td th:text="${dto.vaga.ativo ? 'Sim' : 'Não'}">Sim</td>
+
+            <td>
+                <span th:if="${dto.emUso}" class="vaga-em-uso">
+                    Vaga em uso!
+                </span>
+
+                <div th:if="${!dto.emUso}" class="actions-cell">
+
+                    <a th:href="@{/admin/vagas/editar/{id}(id=${dto.vaga.id})}" class="btn btn-detalhes">
+                        Editar
+                    </a>
+
+                    <form th:action="@{/admin/vagas/toggle/{id}(id=${dto.vaga.id})}" method="post">
+
+                        <button th:if="${dto.vaga.ativo}" type="submit" class="btn btn-saida">
+                            Desativar
+                        </button>
+                        <button th:if="${!dto.vaga.ativo}" type="submit" class="btn btn-detalhes">
+                            Ativar
+                        </button>
+                    </form>
+
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+
+<script>
+    function mostrarFiltro() {
+        var valor = document.getElementById('filtro-principal').value;
+
+        document.getElementById('filtro-prefixo').style.display = 'none';
+        document.getElementById('filtro-tipo').style.display = 'none';
+        document.getElementById('filtro-ativo').style.display = 'none';
+
+        if (valor === "") {
+            // Se o usuário CLICAR em "Mostrar Todos", ele recarrega a página
+            // (Esta parte só é acionada pelo 'onchange')
+            if (event && event.type === 'change') {
+                window.location.href = '/admin/vagas';
+            }
+        }
+        else if (valor) {
+            // Mostra o filtro correto (ex: 'filtro-tipo')
+            document.getElementById('filtro-' + valor).style.display = 'flex';
+        }
+    }
+</script>
+
+</body>
+</html>

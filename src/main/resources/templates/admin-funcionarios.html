@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Gerenciar Funcionários</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<nav class="header-nav">
+    <div class="header-brand">
+        SafeStop
+    </div>
+    <a th:href="@{/}" class="btn btn-detalhes">Voltar ao Dashboard</a>
+</nav>
+
+<div th:if="${errorMessage}" class="error-message">
+    <p th:text="${errorMessage}">Mensagem de erro aqui</p>
+</div>
+
+<div th:if="${successMessage}" class="success-message">
+    <p th:text="${successMessage}">Mensagem de sucesso aqui</p>
+</div>
+
+
+<div class="section-card">
+
+    <div class="section-header">
+        <h2>Gerenciar Funcionários</h2>
+        <div class="actions-bar">
+            <a th:href="@{/admin/funcionarios/novo}" class="btn btn-detalhes">
+                + Novo Funcionário
+            </a>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Nome</th>
+            <th>Email (Login)</th>
+            <th>Telefone</th>
+            <th>Cargo</th>
+            <th>Status</th>
+            <th>Ações</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="usuario : ${usuarios}">
+            <td th:text="${usuario.nome}">Admin Dono</td>
+            <td th:text="${usuario.email}">admin@safestop.com</td>
+            <td th:text="${usuario.telefoneFormatado}">(99) 99999-9999</td>
+
+            <td th:text="${usuario.isAdmin ? 'Admin' : 'Funcionário'}">Admin</td>
+
+            <td th:text="${usuario.ativo ? 'Ativo' : 'Inativo'}">Ativo</td>
+
+            <td>
+                <div class="actions-cell">
+                    <a th:href="@{/admin/funcionarios/editar/{id}(id=${usuario.id})}" class="btn btn-detalhes">Editar</a>
+
+                    <form th:action="@{/admin/funcionarios/toggle/{id}(id=${usuario.id})}" method="post">
+                        <button th:if="${usuario.ativo}" type="submit" class="btn btn-saida">
+                            Desativar
+                        </button>
+                        <button th:if="${!usuario.ativo}" type="submit" class="btn btn-detalhes">
+                            Ativar
+                        </button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>

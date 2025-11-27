@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Registrar Nova Entrada</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<nav class="header-nav">
+    <div class="header-brand">SafeStop</div>
+    <a th:href="@{/}" class="btn btn-detalhes">Voltar ao Dashboard</a>
+</nav>
+
+<div class="section-card">
+    <div class="section-header">
+        <h2>Registrar Nova Entrada</h2>
+    </div>
+
+    <form th:action="@{/ticket/salvar}" method="post" class="form-container">
+
+        <div class="form-group">
+            <div class="label-row">
+                <label for="placa">Placa*</label>
+                <small id="placa-message" class="placa-message-style"></small>
+            </div>
+            <div class="search-bar">
+                <input type="text" id="placa" name="placa" class="form-control-massa"
+                       required maxlength="7" minlength="7"
+                       pattern="[A-Za-z0-9]{7}"
+                       title="A placa deve ter exatamente 7 caracteres (letras ou números).">
+                <button type="button" id="btn-buscar-placa" class="btn btn-detalhes">Buscar</button>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="modelo">Modelo*</label>
+            <input type="text" id="modelo" name="modelo" class="form-control-massa" required>
+        </div>
+        <div class="form-group">
+            <label for="nomeCliente">Nome do Cliente*</label>
+            <input type="text" id="nomeCliente" name="nomeCliente" class="form-control-massa" required>
+        </div>
+        <div class="form-group">
+            <label for="telefoneCliente">Telefone do Cliente* (somente números)</label>
+            <input type="tel" id="telefoneCliente" name="telefoneCliente" class="form-control-massa"
+                   required maxlength="11" minlength="11"
+                   pattern="[0-9]{11}"
+                   placeholder="Apenas números (ex: 41999999999)"
+                   title="O telefone deve ter exatamente 11 dígitos (DDD + número).">
+        </div>
+        <div class="form-group">
+            <label for="vagaId">Vaga Disponível*</label>
+            <select id="vagaId" name="vagaId" required>
+                <option value="" disabled selected>Selecione uma vaga livre...</option>
+                <option th:each="vaga : ${vagasDisponiveis}"
+                        th:value="${vaga.id}"
+                        th:text="${vaga.numeroVaga} + ' (' + ${vaga.tipo} + ')'"></option>
+            </select>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" id="btn-submit" class="btn btn-detalhes">Registrar Entrada</button>
+        </div>
+    </form>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    document.addEventListener("DOMContentLoaded", function() {
+
+        const btnBuscar = document.getElementById('btn-buscar-placa');
+        const btnSubmit = document.getElementById('btn-submit');
+        const inputPlaca = document.getElementById('placa');
+        const inputModelo = document.getElementById('modelo');
+        const inputNome = document.getElementById('nomeCliente');
+        const inputTelefone = document.getElementById('telefoneCliente');
+        const placaMessage = document.getElementById('placa-message');
+
+        function setCamposBloqueados(bloqueado) {
+            inputModelo.readOnly = bloqueado;
+            inputNome.readOnly = bloqueado;
+            inputTelefone.readOnly = bloqueado;
+            const style = bloqueado ? 'background-color: var(--cor-borda);' : '';
+            [inputModelo, inputNome, inputTelefone].forEach(el => el.style = style);
+        }
+
+        function limparCampos(mensagem, cor) {
+            inputModelo.value = '';
+            inputNome.value = '';
+            inputTelefone.value = '';
+            placaMessage.textContent = mensagem;
+            placaMessage.style.color = cor;
+            setCamposBloqueados(false);
+            btnSubmit.disabled = false;
+        }
+
+        btnBuscar.addEventListener("click", async function() {
+            const placa = inputPlaca.value.toUpperCase();
+            if (placa.length !== 7) {
+                placaMessage.textContent = 'Digite uma placa válida (7 caracteres).';
+                placaMessage.style.color = 'var(--cor-perigo)';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/veiculo/${placa}`);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    inputModelo.value = data.modelo;
+                    inputNome.value = data.nomeCliente;
+                    inputTelefone.value = data.telefoneCliente.replace(/\D/g, '');
+                    placaMessage.textContent = 'Veículo encontrado! Cliente: ' + data.nomeCliente;
+                    placaMessage.style.color = 'var(--cor-destaque)';
+                    setCamposBloqueados(true);
+                    btnSubmit.disabled = false;
+
+                } else if (response.status === 404) {
+                    limparCampos('Placa não encontrada. (Novo Cadastro)', 'var(--cor-texto-muted)');
+
+                } else if (response.status === 409) {
+                    const errorMsg = await response.text();
+                    limparCampos(errorMsg, 'var(--cor-perigo)');
+                    btnSubmit.disabled = true;
+                }
+
+            } catch (error) {
+                console.error("Erro ao buscar placa:", error);
+                limparCampos('Erro ao conectar com o servidor.', 'var(--cor-perigo)');
+            }
+        });
+
+        inputPlaca.addEventListener("input", function() {
+            limparCampos('', 'var(--cor-texto-muted)');
+        });
+    });
+    /*]]>*/
+</script>
+
+</body>
+</html>

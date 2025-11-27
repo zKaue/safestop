@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Relatórios</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<nav class="header-nav">
+    <div class="header-brand">
+        SafeStop
+    </div>
+    <a th:href="@{/}" class="btn btn-detalhes">Voltar ao Dashboard</a>
+</nav>
+
+<div class="section-card">
+
+    <div class="section-header">
+        <h2>Relatórios de Faturamento</h2>
+    </div>
+
+    <form th:action="@{/admin/relatorios}" method="get" class="form-container">
+        <div class="filter-bar" style="padding-top: 0; border-top: 0;">
+
+            <div class="form-group-inline">
+                <label for="dataInicio">Data Início:</label>
+                <input type="date" id="dataInicio" name="dataInicio"
+                       th:value="${dataInicioPesquisada}" class="form-control-massa" required>
+            </div>
+
+            <div class="form-group-inline">
+                <label for="dataFim">Data Fim:</label>
+                <input type="date" id="dataFim" name="dataFim"
+                       th:value="${dataFimPesquisada}" class="form-control-massa" required>
+            </div>
+
+            <div class="form-group-inline">
+                <label>&nbsp;</label>
+                <button type="submit" class="btn btn-detalhes">Gerar Relatório</button>
+            </div>
+        </div>
+    </form>
+
+    <div>
+        <div class="stats-container" style="margin-top: 1.5rem;">
+
+            <div class="stat-card">
+                <h3>Faturamento no Período</h3>
+                <p class="small" th:text="'R$ ' + ${#numbers.formatDecimal(faturamentoPeriodo, 1, 2)}">
+                    R$ 0,00
+                </p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Tickets Fechados</h3>
+                <p th:text="${ticketsFechados}">0</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Valor Médio por Ticket</h3>
+                <p class="small" th:text="'R$ ' + ${#numbers.formatDecimal(valorMedio, 1, 2)}">
+                    R$ 0,00
+                </p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Novas Entradas</h3>
+                <p th:text="${novasEntradas}">0</p>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

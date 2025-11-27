@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Editar Vaga</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<nav class="header-nav">
+    <div class="header-brand">
+        SafeStop (Admin)
+    </div>
+    <a th:href="@{/admin/vagas}" class="btn btn-detalhes">Voltar</a>
+</nav>
+
+<div class="section-card">
+    <div class="section-header">
+        <h2>Editar Vaga</h2>
+    </div>
+
+    <form th:action="@{/admin/vagas/editar/salvar}" method="post" class="form-container">
+
+        <input type="hidden" th:value="${vaga.id}" name="id" />
+
+        <div class="form-group">
+            <label for="numeroVaga">Número da Vaga (Não pode ser alterado)</label>
+            <input type="text" id="numeroVaga"
+                   th:value="${vaga.numeroVaga}"
+                   class="form-control-massa" disabled />
+        </div>
+
+        <div class="form-group">
+            <label for="tipo">Tipo de Vaga:</label>
+            <select id="tipo" name="tipo" required>
+                <option th:each="t : ${tiposDeVaga}"
+                        th:value="${t}"
+                        th:text="${t}"
+                        th:selected="${t == vaga.tipo}"></option>
+            </select>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-detalhes">Salvar Alterações</button>
+        </div>
+
+    </form>
+</div>
+
+</body>
+</html>

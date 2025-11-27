@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>SafeStop - Dashboard</title>
+
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<nav class="header-nav">
+    <div class="header-brand">
+        SafeStop
+    </div>
+    <div class="header-actions">
+        <a th:if="${isAdmin}" th:href="@{/admin/relatorios}" class="btn btn-detalhes">
+            Relatórios
+        </a>
+        <a th:if="${isAdmin}" th:href="@{/admin/vagas}" class="btn btn-detalhes">
+            Gerenciar Vagas
+        </a>
+        <a th:if="${isAdmin}" th:href="@{/admin/funcionarios}" class="btn btn-detalhes">
+            Gerenciar Funcionários
+        </a>
+        <a th:if="${isAdmin}" th:href="@{/admin/configuracoes}" class="btn btn-detalhes">
+            Configurações
+        </a>
+        <a th:href="@{/logout}" class="btn btn-saida">Sair</a>
+    </div>
+</nav>
+
+<div th:if="${successMessage}" class="success-message">
+    <p th:text="${successMessage}">Mensagem de sucesso aqui</p>
+</div>
+<div class="section-card">
+    <h2>Estatísticas</h2>
+    <div class="stats-container">
+
+        <div class="stat-card">
+            <h3>Vagas Livres</h3>
+            <p>
+                <span th:text="${stats.vagasLivres}">0</span> /
+                <span th:text="${stats.totalVagas}">0</span>
+            </p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Vagas Ocupadas</h3>
+            <p th:text="${stats.vagasOcupadas}">0</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Ocupação</h3>
+            <p class="small">
+                <span th:text="${#numbers.formatDecimal(stats.percentualOcupacao, 1, 2)}">0.0</span>%
+            </p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Faturamento de Hoje</h3>
+            <p class="small">
+                <span th:text="'R$ ' + ${#numbers.formatDecimal(stats.faturamentoDiario, 1, 2)}">
+                    R$ 0,00
+                </span>
+            </p>
+        </div>
+
+    </div>
+</div>
+<div class="section-card">
+    <div class="section-header">
+        <h2>Veículos Estacionados</h2>
+        <a th:href="@{/ticket/novo}" class="btn btn-detalhes">Registrar Entrada</a>
+    </div>
+    <form th:action="@{/}" method="get" class="search-bar">
+        <input type="text" name="termoBusca" placeholder="Buscar por Placa ou Nome..." th:value="${termoBuscaPesquisado}"/>
+        <button type="submit" class="btn btn-detalhes">Buscar</button>
+    </form>
+    <table>
+        <thead>
+        <tr>
+            <th>Placa</th>
+            <th>Modelo</th>
+            <th>Cliente</th>
+            <th>Telefone</th>
+            <th>Vaga</th>
+            <th>Tipo</th>
+            <th>Entrada</th>
+            <th>Ações</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:if="${stats.ticketsAbertos.isEmpty()}" class="empty-row">
+            <td colspan="8">Nenhum veículo estacionado no momento.</td>
+        </tr>
+
+        <tr th:each="ticket : ${stats.ticketsAbertos}">
+            <td th:text="${ticket.veiculo.placa}">ABC-1234</td>
+            <td th:text="${ticket.veiculo.modelo}">Polo</td>
+            <td th:text="${ticket.veiculo.cliente.nome}">Kaue Braz</td>
+            <td th:text="${ticket.veiculo.cliente.telefone}">(99) 99999-9999</td>
+            <td th:text="${ticket.vaga.numeroVaga}">A1</td>
+            <td th:text="${ticket.vaga.tipo}">COMUM</td>
+            <td th:text="${#temporals.format(ticket.horarioEntrada, 'dd/MM/yyyy HH:mm')}">
+                08/11/2025 18:30
+            </td>
+
+            <td>
+                <div class="actions-cell">
+                    <a th:href="@{/ticket/detalhes/{id}(id=${ticket.id})}" class="btn btn-detalhes">
+                        Detalhes
+                    </a>
+                    <a th:href="@{/ticket/saida/{id}(id=${ticket.id})}" class="btn btn-saida">
+                        Registrar Saída
+                    </a>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

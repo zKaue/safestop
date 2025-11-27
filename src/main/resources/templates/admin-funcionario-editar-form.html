@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Editar Funcionário</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<nav class="header-nav">
+    <div class="header-brand">SafeStop (Admin)</div>
+    <a th:href="@{/admin/funcionarios}" class="btn btn-detalhes">Voltar</a>
+</nav>
+
+<div th:if="${errorMessage}" class="error-message">
+    <p th:text="${errorMessage}">Mensagem de erro aqui</p>
+</div>
+
+<div class="section-card">
+    <div class="section-header">
+        <h2>Editar Funcionário</h2>
+    </div>
+
+    <form th:action="@{/admin/funcionarios/editar/salvar}" th:object="${usuario}" method="post" class="form-container">
+
+        <input type="hidden" th:field="*{id}" />
+        <input type="hidden" th:field="*{senha}" />
+
+        <div class="form-group">
+            <label for="nome">Nome*</label>
+            <input type="text" id="nome" th:field="*{nome}" class="form-control-massa" required>
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email (Login)*</label>
+            <input type="email" id="email" th:field="*{email}" class="form-control-massa" required>
+        </div>
+
+        <div class="form-group">
+            <label for="telefone">Telefone* (somente números)</label>
+            <input type="tel" id="telefone" th:value="*{telefoneSemFormatacao}"
+                   name="telefone"
+                   class="form-control-massa" required maxlength="11" minlength="11"
+                   pattern="[0-9]{11}" placeholder="Apenas números (ex: 41999999999)">
+        </div>
+
+        <div class="form-group">
+            <label for="cargo">Cargo:</label>
+            <select id="cargo" th:field="*{admin}" class="form-group select">
+                <option th:value="true">Admin</option>
+                <option th:value="false">Funcionário</option>
+            </select>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-detalhes">Salvar Alterações</button>
+        </div>
+
+    </form>
+</div>
+
+</body>
+</html>
